@@ -12,7 +12,7 @@ class CloudModelsCollection(BaseModel):
 
 CLOUDMODELS = CloudModelsCollection(
     CloudModels=dict(
-        Adan001=SpectralIndex(
+        Adan001=CloudModel(
             model='Adan',
             version='0.0.1',
             url='https://...',            
