@@ -1,8 +1,9 @@
 import torch
 import maskay.models
 
-def predict(tensor: torch.Tensor, device: str="cuda", model: str="adan"):
-    """ Predict cloud cover from a SEN2 tensor.
+
+def predict(tensor: torch.Tensor, device: str = "cuda", model: str = "adan"):
+    """Predict cloud cover from a SEN2 tensor.
 
     Args:
         tensor (torch.Tensor): A SEN2 with shape (1, CHANNELS, 512, 512).
