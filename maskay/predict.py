@@ -2,7 +2,42 @@ import torch
 import maskay.models
 
 
-def predict(tensor: torch.Tensor, device: str = "cuda", model: str = "adan"):
+def predict_tensor(tensor: torch.Tensor, device: str = "cuda", model: str = "adan") -> torch.Tensor:
+    """Predict cloud cover from a SEN2 tensor.
+
+    Args:
+        tensor (torch.Tensor): A SEN2 with shape (B, C, H, W).
+        device (str, optional): The device to use. Defaults to "cuda".
+        model (str, optional): Define the key of the model to use. Defaults to "adan".
+
+    Raises:
+        ValueError: If the model is not supported.
+
+    Returns:
+
+        torch.Tensor: A tensor with shape (B, 4, H, W) with the cloud cover probabilities.
+    """
+    pass
+
+def predict_SAFE(folder:str, output: str, device: str = "cuda", model: str = "adan") -> bool:
+    """Predict cloud cover from a SAFE folder.
+        
+    Args:
+        folder (str): The path to the SAFE folder.
+        device (str, optional): The device to use. Defaults to "cuda".
+        model (str, optional): Define the key of the model to use. Defaults to "adan".
+        output (str): The output directory.
+        
+    Raises:
+        ValueError: If the model is not supported.
+
+    Returns:
+        bool: True if a GeoTIFF was created.
+    """    
+    pass
+
+
+def __predict_tensor512(tensor: torch.Tensor, device: str = "cuda", model: str = "adan") -> torch.Tensor:
     """Predict cloud cover from a SEN2 tensor.
 
     Args:
