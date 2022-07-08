@@ -25,4 +25,4 @@ def predict(tensor: torch.Tensor, device: str="cuda", model: str="adan"):
 
 if __name__ == "__main__":
     tensor = torch.randn(1, 13, 512, 512)
-    cloudprob = predict(tensor)    
+    cloudprob = predict(tensor)
