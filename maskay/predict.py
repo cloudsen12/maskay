@@ -120,8 +120,7 @@ def predict_SAFE(folder:str, output: str, device: str = "cuda", model: str = "ad
                 SegModel.maskayparams.mindimreq
             )
         )
-    
-    
+        
     # Read data
     container_10m = img_to_numpy(bands=allS2bands10, dim=dim)
     container_20m = img_to_numpy(bands=allS2bands20, dim=dim)

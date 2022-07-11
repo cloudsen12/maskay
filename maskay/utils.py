@@ -14,8 +14,8 @@ def get_models_path():
     ).expanduser()
     
     # create the folder if it does not exist
-    if cred_path.is_dir():
-            cred_path.mkdir(parents=True, exist_ok=True)
+    if not cred_path.is_dir():
+        cred_path.mkdir(parents=True, exist_ok=True)
   
     return cred_path.as_posix()
 
