@@ -98,6 +98,7 @@ def SEN2download(
         if quiet:
             os.system("gsutil -q cp -r %s %s" % (BASEPATH, output))
         else:
+            print("Running: gsutil -m cp -r %s %s" % (BASEPATH, output))
             os.system("gsutil cp -r %s %s" % (BASEPATH, output))
 
     if method == "requests":
