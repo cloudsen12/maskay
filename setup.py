@@ -19,7 +19,7 @@ setup(
     license="MIT",
     author="David Montero Loaiza",
     author_email="dml.mont@gmail.com",
-    description="A Python package for cloud cover in S2",
+    description="A Python package for cloud masking in Sentinel 2",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=("tests",), include=["maskay", "maskay.*"]),
