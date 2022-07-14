@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://github.com/cloudsen12/maskay-puyu"><img src="https://raw.githubusercontent.com/cloudsen12/maskay-puyu/main/docs/_static/llama.png" alt="llama"></a>
+  <a href="https://github.com/cloudsen12/maskay-puyu"><img src="https://www.latercera.com/resizer/V5aqG9i9lnIZsWyq5mDUSVg5-RQ=/900x600/smart/arc-anglerfish-arc2-prod-copesa.s3.amazonaws.com/public/V4TSQHKN2RD3DBB2YSCKGSDVMU.jpg" alt="llama"></a>
 </p>
 <p align="center">
     <em>A Python package for cloud masking in Sentinel 2</em>
