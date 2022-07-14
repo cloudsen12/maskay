@@ -3,19 +3,22 @@ from pydantic import BaseModel
 from ..utils import get_models_path
 import pathlib
 
+
 class CloudModel(BaseModel):
     """
     Python dataclass for a Cloud Model
     """
+
     name: str
     model_params: dict = None
     classname: str
     version: str
-    url: str    
+    url: str
     bands: list
     filename: str
     mindimreq: int
     info: str = "First version"
+
 
 class CloudModelsCollection(BaseModel):
     """
@@ -23,7 +26,6 @@ class CloudModelsCollection(BaseModel):
     """
 
     CloudModels: Dict[str, CloudModel]
-
 
 
 CLOUDMODELS = CloudModelsCollection(
@@ -43,9 +45,23 @@ CLOUDMODELS = CloudModelsCollection(
             classname="CloudModelAdan",
             version="0.0.2",
             url="https://zenodo.org/record/6807536/files/lilith.ckpt",
-            bands=["B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B09", "B10", "B11", "B12"],
+            bands=[
+                "B01",
+                "B02",
+                "B03",
+                "B04",
+                "B05",
+                "B06",
+                "B07",
+                "B08",
+                "B8A",
+                "B09",
+                "B10",
+                "B11",
+                "B12",
+            ],
             filename=(pathlib.Path(get_models_path()) / "adan.ckpt").as_posix(),
-            mindimreq=32 # minimum dimension required for the model
+            mindimreq=32,  # minimum dimension required for the model
         )
     )
 )

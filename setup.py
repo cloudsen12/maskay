@@ -31,7 +31,7 @@ setup(
         "opencv-python",
         "requests",
         "segmentation_models_pytorch",
-        "pytorch_lightning"
+        "pytorch_lightning",
     ],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",

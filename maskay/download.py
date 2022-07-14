@@ -67,7 +67,7 @@ def SEN2download(
         runchecks (bool, optional): If True, run checks on the gsutil. Only used if method is "gsutil". Defaults to True.
         quiet (bool, optional): If True, do not print info messages. Defaults to True.
         method (str, optional): The method to use to download the image. Defaults to "requests".
-        
+
     Returns:
         str: The path to the downloaded image.
 

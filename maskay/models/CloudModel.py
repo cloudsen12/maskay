@@ -1,5 +1,7 @@
 import segmentation_models_pytorch as smp
 import pytorch_lightning as pl
+
+
 class CloudModelAdan(pl.LightningModule):
     def __init__(self):
         super().__init__()
@@ -12,6 +14,6 @@ class CloudModelAdan(pl.LightningModule):
 
     def forward(self, x):
         return self.model(x)
-        
+
     def set_maskay_params(self, maskayparams):
         self.maskayparams = maskayparams
