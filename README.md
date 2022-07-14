@@ -40,7 +40,7 @@
 
 **Documentation**: [https://maskay.readthedocs.io/](https://maskay.readthedocs.io/)
 
-**PyPI**: [https://pypi.org/project/spymaskayndex/](https://pypi.org/project/maskay/)
+**PyPI**: [https://pypi.org/project/maskay/](https://pypi.org/project/maskay/)
 
 **Conda-forge**: [https://anaconda.org/conda-forge/maskay](https://anaconda.org/conda-forge/maskay)
 
