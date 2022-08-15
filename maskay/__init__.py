@@ -1,2 +1,2 @@
-from .predict import predict_tensor, predict_SAFE
-from .download import SEN2download, SEN2downloadGEE
+from .download import l8, s2
+from .predict import predict

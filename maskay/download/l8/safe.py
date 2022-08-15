@@ -2,61 +2,14 @@ import os
 import pathlib
 import re
 from xml.dom import minidom
-
-import ee
 import requests
+from ...utils import color
 
-
-def SEN2downloadGEE(
-    s2id: str,
-    output: str,
-    runchecks: bool = True,
-    quiet: bool = True,
-    method: str = "requests",
-):
-    """Download a Sentinel-2 image using Google Earth Engine IDs.
-
-    Args:
-        s2id (str): The GEE Sentinel-2 ID.
-        output (str): The output directory.
-        runchecks (bool, optional): If True, run checks on the Earth Engine and gsutil. Defaults to True.
-        quiet (bool, optional): If True, do not print info messages. Defaults to True.
-        method (str, optional): The method to use to download the image. Defaults to "requests".
-
-    Returns:
-        str: The path to the downloaded image.
-
-    Examples:
-        >>> import ee
-        >>> ee.Initialize()
-        >>> s2id = "20190212T142031_20190212T143214_T19FDF"
-        >>> s2idpath = SEN2downloadGEE(s2id, "/home/user/")
-        >>> print(s2idpath)
-        >>> "/home/user/S2A_MSIL1C_20190221T142031_N0213_R092_T19FDF_20190212T142031.SAFE/"
-    """
-
-    # check if ee is initialized
-    if runchecks:
-        __eecheck()
-
-    # Identify S2 image using GEE S2 ID
-    s2 = ee.ImageCollection("COPERNICUS/S2")
-    s2 = s2.filter(ee.Filter.eq("system:index", s2id)).first()
-
-    # Get tile information.
-    productid = s2.get("PRODUCT_ID").getInfo()
-
-    # Download S2 image.
-    SEN2download(productid, output, quiet)
-
-    return True
-
-
-def SEN2download(
+def SAFE(
     productid: str,
     output: str,
     runchecks: bool = True,
-    quiet: bool = True,
+    quiet: bool = False,
     method: str = "requests",
 ):
     """Download a Sentinel-2 image using a product ID.
@@ -65,23 +18,21 @@ def SEN2download(
         productid (str): The full id of the Sentinel-2 product.
         output (str): The output directory to save the image.
         runchecks (bool, optional): If True, run checks on the gsutil. Only used if method is "gsutil". Defaults to True.
-        quiet (bool, optional): If True, do not print info messages. Defaults to True.
-        method (str, optional): The method to use to download the image. Defaults to "requests".
-
+        quiet (bool, optional): If True, do not print info messages. Defaults to False.
+        method (str, optional): The method to use to download the image. Defaults to "requests". Available options are "requests" and "gsutil".
+        
     Returns:
         str: The path to the downloaded image.
-
+        
+    Raises:
+        Exception: If the productid is not valid.
+        Exception: If gsutil is not installed.
+        
     Examples:
-        >>> import ee
-        >>> ee.Initialize()
-        >>> s2idfull = "S2A_MSIL1C_20190221T142031_N0213_R092_T19FDF_20190212T142031"
-        >>> s2idpath = SEN2download(s2idfull, "/home/user/")
-        >>> print(s2idpath)
-        >>> "/home/user/S2A_MSIL1C_20190221T142031_N0213_R092_T19FDF_20190212T142031.SAFE/"
+        >>> import maskay
+        >>> s2idfull = "S2A_MSIL1C_20190212T142031_N0207_R010_T19FDF_20190212T191443"
+        >>> s2idpath = maskay.download.s2.SAFE(s2idfull, "/home/user/")
     """
-    # check if gsutil is installed
-    if runchecks:
-        __gsutilcheck()
 
     # Get tile grid info.
     rgx_expr = "(.*)_(.*)_(.*)_(.*)_(.*)"
@@ -90,8 +41,12 @@ def SEN2download(
     p02 = tile_info[2]
     p03 = tile_info[3:5]
 
-    # 4. Download the S2 L1C image folder.
+    # Download the S2 L1C image folder.
     if method == "gsutil":
+        # check if gsutil is installed
+        if runchecks:
+            __gsutilcheck()
+
         # 3. Create the path to download the image.
         base_uri = "gs://gcp-public-data-sentinel-2/tiles"
         BASEPATH = "%s/%s/%s/%s/%s.SAFE/" % (base_uri, p01, p02, p03, productid)
@@ -104,7 +59,7 @@ def SEN2download(
     if method == "requests":
         base_uri = "https://storage.googleapis.com/gcp-public-data-sentinel-2/tiles"
         folder_img = "%s/%s/%s/%s/%s.SAFE/" % (base_uri, p01, p02, p03, productid)
-
+        
         # Create the output folder if it does not exist.
         PATH = pathlib.Path(output)
         if not PATH.exists():
@@ -126,13 +81,35 @@ def SEN2download(
 
         # download images
         models = file.getElementsByTagName("IMAGE_FILE")
+        
+        # if models is empty return an exception
+        if len(models) == 0:
+            raise Exception(
+                color.RED + "No images found. Please check the" +
+                color.BOLD + " productid" + color.END + "."
+            )
+                
+        # Download all S2L1C bands
         for model in models:
-            if not quiet:
-                print("Downloading: %s" % model.firstChild.data)
-
-            # Get S2 image from google cloud storage
+                      
+            # Get S2 image band from google cloud storage
             S2todownload = (folder_img + model.firstChild.data) + ".jp2"
-
+            band = re.search(
+                string=pathlib.Path(model.firstChild.data).stem,
+                pattern="(.*)_(.*)_(.*)",
+                flags=re.IGNORECASE,
+            ).group(3)
+            
+            # NO download the TCI image if it is exists.
+            if band == "TCI":
+                continue
+            
+            if not quiet:
+                print(
+                    color.BLUE + color.BOLD + "Downloading [%s]: " % band +
+                    color.END + color.UNDERLINE + S2todownload + color.END
+                )
+            
             # where to save the S2 image
             S2tosave = BASEPATH / model.firstChild.data
 
@@ -144,24 +121,9 @@ def SEN2download(
             r = requests.get(S2todownload, allow_redirects=True)
             with open(S2tosave, "wb") as f:
                 f.write(r.content)
-    return BASEPATH
+    return BASEPATH.as_posix()
 
-
-def __eecheck():
-    """Simple check to see if the Earth Engine is working.
-    Raises:
-        Exception: If the Earth Engine is not working.
-    Returns:
-        bool: True if gsutil is installed.
-    """
-    try:
-        ee.Image(0)
-    except:
-        raise Exception("ee is not initialized")
-
-    return True
-
-
+    
 def __gsutilcheck():
     """Check if the gsutil is installed.
 
