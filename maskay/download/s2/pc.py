@@ -3,8 +3,8 @@ from pyproj.aoi import AreaOfInterest
 import pystac_client
 import rasterio.features
 import numpy as np
-import stackstac
-import planetary_computer as pc
+#import stackstac
+#import planetary_computer as pc
 from pyproj import Transformer
 
 
