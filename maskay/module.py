@@ -1,4 +1,5 @@
 import itertools
+from rasterio.enums import Resampling
 from collections import OrderedDict
 from typing import List
 

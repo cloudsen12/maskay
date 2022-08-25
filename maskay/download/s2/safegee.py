@@ -1,8 +1,3 @@
-try:
-    import ee
-except ImportError:
-    print("Please install the following packages: earthengine-api.")
-
 from .safe import SAFE
 
 
@@ -35,6 +30,11 @@ def SAFEGEE(
         >>> s2id = "20190212T142031_20190212T143214_T19FDF"
         >>> s2idpath = maskay.download.s2.SAFEGEE(s2id, "/home/user/")
     """
+
+    try:
+        import ee
+    except ImportError:
+        print("Please install the following packages: earthengine-api.")
 
     # check if ee is initialized
     if runchecks:

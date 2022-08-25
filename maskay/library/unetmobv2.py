@@ -5,11 +5,11 @@ import numpy as np
 import pytorch_lightning as pl
 import segmentation_models_pytorch as smp
 
-from maskay.moduleTorch import ModuleTorch
+from maskay.torch import Module
 from maskay.utils import get_models_path, softmax
 
-
-class UnetMobV2(ModuleTorch):
+#self = UnetMobV2()
+class UnetMobV2(Module):
     def __init__(self):
         super().__init__()
         self.model = model_setup()

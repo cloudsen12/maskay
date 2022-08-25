@@ -1,32 +1,9 @@
 import numpy as np
 import rasterio.features
-import pystac_client
+
 from pyproj import Transformer
 from pyproj.aoi import AreaOfInterest
 from pyproj.database import query_utm_crs_info
-
-is_external_package_installed = []
-
-try:
-    import planetary_computer as pc
-except ImportError:
-    is_external_package_installed.append("planetary_computer")
-
-try:
-    import stackstac
-except ImportError:
-    is_external_package_installed.append("stackstac")
-
-try:
-    import pystac_client
-except ImportError:
-    is_external_package_installed.append("pystac_client")
-
-if is_external_package_installed != []:
-    nopkgs = ', '.join(is_external_package_installed)
-    raise ImportError(
-        f"Please install the following packages: {nopkgs}."
-    )
 
 S2BANDS_L2A = [
     "B01",
@@ -48,6 +25,29 @@ S2BANDS_L2A = [
 
 
 def PC(coords, iniDate, endDate, buffer, bands=None):
+    # Check if packages are installed
+    is_external_package_installed = []
+
+    try:
+        import planetary_computer as pc
+    except ImportError:
+        is_external_package_installed.append("planetary_computer")
+
+    try:
+        import stackstac
+    except ImportError:
+        is_external_package_installed.append("stackstac")
+
+    try:
+        import pystac_client
+    except ImportError:
+        is_external_package_installed.append("pystac_client")
+
+    if is_external_package_installed != []:
+        nopkgs = ', '.join(is_external_package_installed)
+        raise ImportError(
+            f"Please install the following packages: {nopkgs}."
+        )
 
     utm_crs_list = query_utm_crs_info(
         datum_name="WGS 84",

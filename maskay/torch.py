@@ -1,5 +1,4 @@
 from tqdm import tqdm
-from rasterio.enums import Resampling
 from maskay.utils import color
 import numpy as np
 import xarray as xr
@@ -13,7 +12,7 @@ from maskay.module import MaskayModule
 from maskay.tensorsat import TensorSat
 
 
-class ModuleTorch(MaskayModule):
+class Module(MaskayModule):
     def __init__(
         self,
         cropsize: int = 512,
@@ -47,7 +46,7 @@ class ModuleTorch(MaskayModule):
     def _predict(self, tensor: TensorSat):
         # Obtain the zero coordinate to create an IP
         zero_coord = self._MagickCrop(tensor)
-
+        
         # Number of image patches (IPs)
         IPslen = self.get_ips(zero_coord)
 
@@ -62,7 +61,7 @@ class ModuleTorch(MaskayModule):
         outensor = None
 
         batch_iter = range(0, IPslen, self.batchsize)
-        for index in tqdm(batch_iter, disable=self.quiet):
+        for index in tqdm(batch_iter, disable=self.quiet):            
             batched_IP = list()
             zerocoords = list()
             for index2 in range(index * self.batchsize, (index + 1) * self.batchsize):
@@ -76,7 +75,7 @@ class ModuleTorch(MaskayModule):
                 ]
                 base_cropsize = tensor_cropsize[rbase_name]
 
-                for key, _ in zero_coord.items():
+                for key, _ in zero_coord.items():                    
                     # Select the zero coordinate
                     mrx, mry = zero_coord[key][index2]
 
@@ -91,15 +90,15 @@ class ModuleTorch(MaskayModule):
                     # Resample the raster to the reference raster
                     if base_cropsize != cropsize:
                         tensorIP = self._align(rbase_ip, tensorIP)
-
+                    
                     # Append the IP to the container
                     IP.append(tensorIP.to_numpy())
 
                 # Stack the IP
                 IP = np.stack(IP, axis=0)
-
+                
                 # Append the IP to the batch
-                zerocoords.append((mrx, mry))
+                zerocoords.append((bmrx, bmry))                
                 batched_IP.append(IP)
 
             # Stack the batch
@@ -124,12 +123,15 @@ class ModuleTorch(MaskayModule):
 
             # Copy the IP values in the outputtensor
             gather_zerocoord = self._MagickGather(outensor, zerocoords)
-
-            for index, zcoords in enumerate(gather_zerocoord):
+            
+            for index3, zcoords in enumerate(gather_zerocoord):
+                # Coordinates to copy the IP
                 (Xmin, Ymin), (Xmax, Ymax) = zcoords["outensor"]
                 (XIPmin, YIPmin), (XIPmax, YIPmax) = zcoords["ip"]
+                
+                # Copy the IP
                 outensor[:, Xmin:Xmax, Ymin:Ymax] = batched_IP[
-                    index, :, XIPmin:XIPmax, YIPmin:YIPmax
+                    index3, :, XIPmin:XIPmax, YIPmin:YIPmax
                 ]
 
         # Create the output tensor rio xarray object
