@@ -2,8 +2,11 @@ import os
 import pathlib
 import re
 from xml.dom import minidom
+
 import requests
+
 from ...utils import color
+
 
 def SAFE(
     productid: str,
@@ -20,14 +23,14 @@ def SAFE(
         runchecks (bool, optional): If True, run checks on the gsutil. Only used if method is "gsutil". Defaults to True.
         quiet (bool, optional): If True, do not print info messages. Defaults to False.
         method (str, optional): The method to use to download the image. Defaults to "requests". Available options are "requests" and "gsutil".
-        
+
     Returns:
         str: The path to the downloaded image.
-        
+
     Raises:
         Exception: If the productid is not valid.
         Exception: If gsutil is not installed.
-        
+
     Examples:
         >>> import maskay
         >>> s2idfull = "S2A_MSIL1C_20190212T142031_N0207_R010_T19FDF_20190212T191443"
@@ -59,7 +62,7 @@ def SAFE(
     if method == "requests":
         base_uri = "https://storage.googleapis.com/gcp-public-data-sentinel-2/tiles"
         folder_img = "%s/%s/%s/%s/%s.SAFE/" % (base_uri, p01, p02, p03, productid)
-        
+
         # Create the output folder if it does not exist.
         PATH = pathlib.Path(output)
         if not PATH.exists():
@@ -81,17 +84,21 @@ def SAFE(
 
         # download images
         models = file.getElementsByTagName("IMAGE_FILE")
-        
+
         # if models is empty return an exception
         if len(models) == 0:
             raise Exception(
-                color.RED + "No images found. Please check the" +
-                color.BOLD + " productid" + color.END + "."
+                color.RED
+                + "No images found. Please check the"
+                + color.BOLD
+                + " productid"
+                + color.END
+                + "."
             )
-                
+
         # Download all S2L1C bands
         for model in models:
-                      
+
             # Get S2 image band from google cloud storage
             S2todownload = (folder_img + model.firstChild.data) + ".jp2"
             band = re.search(
@@ -99,17 +106,22 @@ def SAFE(
                 pattern="(.*)_(.*)_(.*)",
                 flags=re.IGNORECASE,
             ).group(3)
-            
+
             # NO download the TCI image if it is exists.
             if band == "TCI":
                 continue
-            
+
             if not quiet:
                 print(
-                    color.BLUE + color.BOLD + "Downloading [%s]: " % band +
-                    color.END + color.UNDERLINE + S2todownload + color.END
+                    color.BLUE
+                    + color.BOLD
+                    + "Downloading [%s]: " % band
+                    + color.END
+                    + color.UNDERLINE
+                    + S2todownload
+                    + color.END
                 )
-            
+
             # where to save the S2 image
             S2tosave = BASEPATH / model.firstChild.data
 
@@ -123,7 +135,7 @@ def SAFE(
                 f.write(r.content)
     return BASEPATH.as_posix()
 
-    
+
 def __gsutilcheck():
     """Check if the gsutil is installed.
 

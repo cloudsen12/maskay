@@ -1,16 +1,30 @@
-from pyproj.database import query_utm_crs_info
-from pyproj.aoi import AreaOfInterest
+import numpy as np
+import planetary_computer as pc
 import pystac_client
 import rasterio.features
-import numpy as np
-#import stackstac
-#import planetary_computer as pc
+
+# import stackstac
 from pyproj import Transformer
+from pyproj.aoi import AreaOfInterest
+from pyproj.database import query_utm_crs_info
 
-
-S2BANDS_L2A = ["B01", "B02", "B03", "B04", "B05", "B06",
-               "B07", "B08", "B8A", "B09", "B11", "B12",
-               "SCL", "AOT", "WVP"]
+S2BANDS_L2A = [
+    "B01",
+    "B02",
+    "B03",
+    "B04",
+    "B05",
+    "B06",
+    "B07",
+    "B08",
+    "B8A",
+    "B09",
+    "B11",
+    "B12",
+    "SCL",
+    "AOT",
+    "WVP",
+]
 
 
 def PC(coords, iniDate, endDate, buffer, bands=None):
@@ -24,29 +38,28 @@ def PC(coords, iniDate, endDate, buffer, bands=None):
     aoi = towerFootprint(coords[0], coords[1], buffer)
     bbox = rasterio.features.bounds(towerFootprint(coords[0], coords[1], buffer, False))
 
-    CATALOG = pystac_client.Client.open("https://planetarycomputer.microsoft.com/api/stac/v1")
+    CATALOG = pystac_client.Client.open(
+        "https://planetarycomputer.microsoft.com/api/stac/v1"
+    )
 
     SEARCH = CATALOG.search(
-        intersects=aoi,
-        datetime=f"{iniDate}/{endDate}",
-        collections=["sentinel-2-l2a"]
+        intersects=aoi, datetime=f"{iniDate}/{endDate}", collections=["sentinel-2-l2a"]
     )
 
     items = list(SEARCH.get_items())
-    
+
     if bands is None:
         bands = S2BANDS_L2A
 
     S2 = signAndStack(items, bbox, epsg, bands)
-    
-    return S2
 
+    return S2
 
 
 # Auxiliary functions ------------------------------------------------------
 def signAndStack(items, bbox, epsg, bands):
     signed_items = []
-    
+
     for item in items:
         item.clear_links()
         signed_items.append(pc.sign(item).to_dict())
@@ -68,7 +81,7 @@ def towerFootprint(x, y, distance, latlng=True, resolution=10):
     utm_crs_list = query_utm_crs_info(
         datum_name="WGS 84",
         area_of_interest=AreaOfInterest(x, y, x, y),
-    )    
+    )
     transformer = Transformer.from_crs(
         "EPSG:4326", "EPSG:" + utm_crs_list[0].code, always_xy=True
     )

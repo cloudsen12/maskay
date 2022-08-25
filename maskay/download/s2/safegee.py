@@ -1,5 +1,7 @@
 import ee
+
 from .safe import SAFE
+
 
 def SAFEGEE(
     s2id: str,
@@ -43,7 +45,7 @@ def SAFEGEE(
     productid = s2.get("PRODUCT_ID").getInfo()
 
     # Download S2 image.
-    BASEPATH = SAFE(productid, output, runchecks, quiet,  method)
+    BASEPATH = SAFE(productid, output, runchecks, quiet, method)
 
     return BASEPATH
 
