@@ -25,12 +25,9 @@ setup(
     packages=find_packages(exclude=("tests",), include=["maskay", "maskay.*"]),
     install_requires=[
         "rioxarray",
-        "earthengine-api",
-        "rasterio",
-        "numpy",
         "requests",
-        "segmentation_models_pytorch",
-        "pytorch_lightning",
+        "gdown",
+        "numpy"
     ],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",

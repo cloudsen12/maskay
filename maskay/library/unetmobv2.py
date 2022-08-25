@@ -5,7 +5,7 @@ import numpy as np
 import pytorch_lightning as pl
 import segmentation_models_pytorch as smp
 
-from maskay.module import ModuleTorch
+from maskay.moduleTorch import ModuleTorch
 from maskay.utils import get_models_path, softmax
 
 

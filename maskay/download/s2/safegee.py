@@ -1,4 +1,7 @@
-import ee
+try:
+    import ee
+except ImportError:
+    print("Please install the following packages: earthengine-api.")
 
 from .safe import SAFE
 
