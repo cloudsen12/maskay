@@ -28,8 +28,6 @@ setup(
         "earthengine-api",
         "rasterio",
         "numpy",
-        "tensorflow",
-        "opencv-python",
         "requests",
         "segmentation_models_pytorch",
         "pytorch_lightning",
