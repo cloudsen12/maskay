@@ -24,7 +24,7 @@ setup(
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=("tests",), include=["maskay", "maskay.*"]),
     install_requires=[
-        "pydantic",
+        "rioxarray",
         "earthengine-api",
         "rasterio",
         "numpy",

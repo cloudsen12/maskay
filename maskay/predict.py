@@ -30,9 +30,6 @@ class Predictor:
         # no long line
         msg = (
             "Predictor("
-            + "classes="
-            + str(self.classes)
-            + ", "
             + "cropsize="
             + str(self.cropsize)
             + ", "
