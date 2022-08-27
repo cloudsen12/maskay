@@ -56,6 +56,12 @@ def model_setup():
     except ImportError:
         is_external_package_installed.append("tensorflow")
 
+    if is_external_package_installed != []:
+        nopkgs = ', '.join(is_external_package_installed)
+        raise ImportError(
+            f"Please install the following packages: {nopkgs}."
+        )
+
     class KappaModelUNet:
         def __init__(self, version: str = "L1C"):
             if version == "L1C":

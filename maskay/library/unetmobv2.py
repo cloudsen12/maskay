@@ -41,8 +41,15 @@ def model_setup():
     try:
         import segmentation_models_pytorch as smp
     except ImportError:
-        is_external_package_installed.append("segmentation_models_pytorch")    
+        is_external_package_installed.append("segmentation_models_pytorch")
 
+    if is_external_package_installed != []:
+        nopkgs = ', '.join(is_external_package_installed)
+        raise ImportError(
+            f"Please install the following packages: {nopkgs}."
+        )    
+    
+    
     class UnetMobV2Class(pl.LightningModule):
         def __init__(self):
             super().__init__()

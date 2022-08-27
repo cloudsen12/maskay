@@ -14,7 +14,7 @@ def read(filename):
 
 setup(
     name="maskay",
-    version="0.0.1",
+    version="0.0.1.1",
     url="https://github.com/cloudsen12/maskay-puyu",
     license="MIT",
     author="David Montero Loaiza",
