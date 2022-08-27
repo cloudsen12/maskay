@@ -11,14 +11,26 @@ S2files = maskay.utils.MaskayDict(
     recursive=True,
     sensor="Sentinel-2"
 )
-tensor = maskay.TensorSat(**S2files.to_dict(), cache=True, align=True)
+bands = S2files[[7, 3, 2, 1]]
+tensor = maskay.TensorSat(**bands.to_dict(), cache=True, align=True)
 
 # Make a prediction
-model = maskay.library.UnetMobV2()
-predictor = maskay.Predictor(cropsize = 512, overlap = 32, device = "cpu", batchsize = 1, quiet = False)
+#model = maskay.library.UnetMobV2()
+#model = maskay.library.KappaModelUNetL1C()
+#model = maskay.library.DynamicWorld()
+model = maskay.library.CDFCNNrgbi()
+predictor = maskay.Predictor(
+    cropsize = 512,
+    overlap = 32,
+    device = "cpu",
+    batchsize = 1,
+    quiet = False,
+    order = "BHWC"
+)
 result = predictor.predict(model, tensor)
-predictor.result.rio.to_raster("/content/demo.tif")
-
+result.shape
+predictor.result.rio.to_raster("/home/csaybar/outensor2.tif")
+ 
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -29,5 +41,10 @@ plt.imshow(rtoplot/10000)
 plt.show()
  
 
+import timeit
 
-tensor.Blue
+aa = time.time()
+#a = np.zeros((1, 9, 512, 512))*1.
+test = np.ones((128, 128, 128))
+np.sum(a) == 0
+time.time() - aa

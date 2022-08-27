@@ -8,20 +8,23 @@ class Predictor:
         overlap: int = 32,
         device: str = "cpu",
         batchsize: int = 1,
+        order: int = "BCHW",
         quiet: int = False,
     ):
+        self.batchsize = batchsize
         self.cropsize = cropsize
         self.overlap = overlap
         self.device = device
-        self.batchsize = batchsize
+        self.order = order
         self.quiet = quiet
         self.result = None
 
     def predict(self, model, tensor: TensorSat):
+        model.batchsize = self.batchsize
         model.cropsize = self.cropsize
         model.overlap = self.overlap
         model.device = self.device
-        model.batchsize = self.batchsize
+        model.order = self.order
         model.quiet = self.quiet
         self.result = model._predict(tensor=tensor)
         return self.result
@@ -39,6 +42,8 @@ class Predictor:
             + "device="
             + str(self.device)
             + ", "
+            + "order="
+            + str(self.order)
             + "batchsize="
             + str(self.batchsize)
             + ", "

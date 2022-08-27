@@ -2,6 +2,8 @@ import itertools
 from rasterio.enums import Resampling
 from collections import OrderedDict
 from typing import List
+from tqdm import tqdm
+
 
 import numpy as np
 import xarray as xr
@@ -9,11 +11,12 @@ import xarray as xr
 from maskay.tensorsat import TensorSat
 
 class MaskayModule:
-    def __init__(self, cropsize, overlap, device, batchsize, quiet):
+    def __init__(self, cropsize, overlap, device, batchsize, order, quiet):
         self.cropsize = cropsize
         self.overlap = overlap
         self.device = device
         self.batchsize = batchsize
+        self.order = order
         self.quiet = quiet
 
     @property
@@ -223,3 +226,122 @@ class MaskayModule:
                 }
             )
         return container
+    
+    def _predict(self, tensor: TensorSat):
+        # Obtain the zero coordinate to create an IP
+        zero_coord = self._MagickCrop(tensor)
+        
+        # Number of image patches (IPs)
+        IPslen = self.get_ips(zero_coord)
+
+        # Get the cropsize for each raster
+        tensor_cropsize = self.get_cropsize(tensor)
+
+        # Raster ref (lowest resolution)
+        rbase = tensor.rasterbase()
+        rbase_name = tensor.rasterbase_name()
+
+        # Create outensor
+        outensor = None
+                
+        batch_iter = range(0, IPslen, self.batchsize)
+        for index in tqdm(batch_iter, disable=self.quiet):            
+            batched_IP = list()
+            zerocoords = list()
+            for index2 in range(index * self.batchsize, (index + 1) * self.batchsize):
+                # Container to create a full IP with all bands with the same resolution
+                IP = list()
+
+                # Reference raster IP
+                bmrx, bmry = zero_coord[rbase_name][index2]
+                rbase_ip = rbase[
+                    bmrx : (bmrx + self.cropsize), bmry : (bmry + self.cropsize)
+                ]
+                base_cropsize = tensor_cropsize[rbase_name]
+
+                for key, _ in zero_coord.items():
+                    # Select the zero coordinate
+                    mrx, mry = zero_coord[key][index2]
+
+                    # Obtain the specific cropsize for each raster
+                    cropsize = tensor_cropsize[key]
+
+                    # Crop the full raster using specific coordinates
+                    tensorIP = tensor.dictarray[key][
+                        mrx : (mrx + cropsize), mry : (mry + cropsize)
+                    ]
+
+                    # Resample the raster to the reference raster
+                    if base_cropsize != cropsize:
+                        tensorIP = self._align(rbase_ip, tensorIP)                                        
+                    
+                    # Append the IP to the container
+                    IP.append(tensorIP.to_numpy())
+
+                # Stack the IP
+                IP = np.stack(IP, axis=0)
+                
+                # Append the IP to the batch
+                zerocoords.append((bmrx, bmry))
+                batched_IP.append(IP)
+
+            # Stack the batch
+            batched_IP = np.stack(batched_IP, axis=0)
+
+            # Change order of the batched_IP
+            if self.order == "BHWC":
+                batched_IP = np.moveaxis(batched_IP, 1, -1)
+            
+            # Run the preprocessing
+            batched_IP = self.inProcessing(batched_IP)
+            
+            if not isinstance(batched_IP, list):
+                # Run the model
+                batched_IP = self._run(batched_IP)
+                
+                # Run the postprocessing
+                batched_IP = self.outProcessing(batched_IP)
+            else:
+                if outensor is not None:
+                    batched_IP = batched_IP[0].astype(dtype)
+                # If the outensor is not created yet, we do not
+                # know the dtype of the output tensor
+                else:
+                    # Run the model
+                    batched_IP = self._run(batched_IP)
+                    
+                    # Run the postprocessing
+                    batched_IP = self.outProcessing(batched_IP)
+                                                                        
+            # If is the first iteration, create the output tensor
+            if outensor is None:
+                classes = batched_IP.shape[1]
+                dtype = batched_IP.dtype
+                outensor = np.zeros(
+                    shape=(classes, rbase.shape[0], rbase.shape[1]),
+                    dtype=dtype
+                )
+
+            # Copy the IP values in the outputtensor
+            gather_zerocoord = self._MagickGather(outensor, zerocoords)
+            
+            for index3, zcoords in enumerate(gather_zerocoord):
+                # Coordinates to copy the IP
+                (Xmin, Ymin), (Xmax, Ymax) = zcoords["outensor"]
+                (XIPmin, YIPmin), (XIPmax, YIPmax) = zcoords["ip"]
+                
+                # Copy the IP
+                outensor[:, Xmin:Xmax, Ymin:Ymax] = batched_IP[
+                    index3, :, XIPmin:XIPmax, YIPmin:YIPmax
+                ]
+
+        # Create the output tensor rio xarray object
+        xcoord, ycoord = rbase.coords["y"].values, rbase.coords["x"].values
+        coords = [np.arange(0, classes), xcoord, ycoord]
+        dims = ["band", "y", "x"]
+
+        return (
+            xr.DataArray(outensor, coords=coords, dims=dims)
+            .rio.write_nodata(-999)
+            .rio.write_transform(rbase.rio.transform())
+        )
