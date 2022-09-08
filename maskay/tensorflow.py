@@ -3,7 +3,7 @@ import numpy as np
 try:
     import tensorflow as tf
 except ImportError:
-    raise ImportError("Please install the following packages: torch.")
+    raise ImportError("Please install the following packages: tensorflow.")
 
 from maskay.module import MaskayModule
 
