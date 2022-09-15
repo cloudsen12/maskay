@@ -19,7 +19,8 @@ S2files = maskay.utils.MaskayDict(
     recursive=True,
     sensor="Sentinel-2"
 )
-tensor = maskay.TensorSat(**S2files.to_dict(), cache=True, align=True)
+bands = S2files[[1, 2, 3, 8]]
+tensor = maskay.TensorSat(**bands.to_dict(), cache=True, align=True)
 
 # Make a prediction
 model = UnetMobV2()
@@ -36,8 +37,7 @@ predictor = maskay.Predictor(
 )
 result = predictor.predict(model, tensor)
 result.shape
-predictor.result.rio.to_raster(os.path.join(path_save_products, "outensor2.tif"))
-bands = S2files[[7, 3, 2, 1]]
+predictor.result.rio.to_raster("/home/csaybar/outensor3.tif")
  
 import matplotlib.pyplot as plt
 import numpy as np
