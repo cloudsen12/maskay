@@ -44,10 +44,11 @@
 
 **Conda-forge**: [https://anaconda.org/conda-forge/maskay](https://anaconda.org/conda-forge/maskay)
 
-Pre-trained models from the CloudSEN12 dataset are released under a [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) licence. For using the models in comercial pipelines written consent by the authors is needed.
 ---
 
 
 # Overview
 
 A Python package about llamas
+
+Pre-trained models from the CloudSEN12 dataset are released under a [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) licence. For using the models in comercial pipelines written consent by the authors is needed.
